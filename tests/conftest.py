@@ -8,7 +8,9 @@ from sqlalchemy.pool import StaticPool
 
 from dscommerce_fastapi.app import app
 from dscommerce_fastapi.database import get_session
-from dscommerce_fastapi.db.models.users import User, table_registry
+from dscommerce_fastapi.db.models.categories import category_registry
+from dscommerce_fastapi.db.models.products import Product, product_registry
+from dscommerce_fastapi.db.models.users import User, user_registry
 from dscommerce_fastapi.security import get_password_hash
 
 
@@ -24,6 +26,17 @@ class UserFactory(factory.Factory):
     phone = factory.Faker('phone_number')
     password = factory.LazyAttribute(lambda obj: f'{obj.username}+senha')
     # password = get_password_hash('testtest')
+
+
+class ProductFactory(factory.Factory):
+    class Meta:
+        model = Product
+
+    name = factory.Faker('name')
+    serial_code = factory.Sequence(lambda n: f'code{n}')
+    description = factory.Faker('sentence')
+    price = factory.fuzzy.FuzzyDecimal(0, 1000, precision=2)
+    img_url = factory.Faker('url')
 
 
 # fixture para não ter que criar o TestCliente toda vez,
@@ -57,7 +70,9 @@ def session():
 
     # cria todas as tabelas dos models que estão registrados como
     # @table_registry.mapped_as_dataclass, como o model User por exemplo
-    table_registry.metadata.create_all(engine)
+    user_registry.metadata.create_all(engine)
+    product_registry.metadata.create_all(engine)
+    category_registry.metadata.create_all(engine)
 
     with Session(engine) as session:
         # yield transforma a Session em um gerador, a fixture vai rodar até o
@@ -74,7 +89,9 @@ def session():
         yield session
 
     # após todos os testes, dropa as tabelas criadas
-    table_registry.metadata.drop_all(engine)
+    user_registry.metadata.drop_all(engine)
+    product_registry.metadata.drop_all(engine)
+    category_registry.metadata.drop_all(engine)
 
 
 # fixture para que se for passado user como parametro, ele vai ter um objeto
@@ -109,3 +126,12 @@ def token(client, user):
         data={'username': user.username, 'password': user.clean_password},
     )
     return response.json()['access_token']
+
+
+@pytest.fixture
+def product(session):
+    product = ProductFactory()
+    session.add(product)
+    session.commit()
+    session.refresh(product)
+    return product

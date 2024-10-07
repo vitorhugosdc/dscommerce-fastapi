@@ -7,7 +7,7 @@ from alembic import context
 
 #vai dar b.o depois, ver um jeito de pegar todos, talvez dar um append, sei lá,
 # ou importar o table_registry de users em todo lugar
-from dscommerce_fastapi.db.models.users import table_registry
+from dscommerce_fastapi.db.models.users import user_registry
 
 from dscommerce_fastapi.settings import Settings
 
@@ -25,7 +25,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = table_registry.metadata
+target_metadata = user_registry.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
