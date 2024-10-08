@@ -1,10 +1,11 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
 
-from dscommerce_fastapi.db.models.categories import Category
+if TYPE_CHECKING:
+    from dscommerce_fastapi.db.models.categories import Category
 from dscommerce_fastapi.db.models.users import User
 
 product_registry = registry()
@@ -48,7 +49,7 @@ class Product:
     )
 
     # products é o nome do atributo lá na Category
-    category: Mapped[Category] = relationship(
+    category: Mapped['Category'] = relationship(
         'Category', back_populates='products'
     )
 

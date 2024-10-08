@@ -1,10 +1,13 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
 
-from dscommerce_fastapi.db.models.products import Product
+if TYPE_CHECKING:
+    # from dscommerce_fastapi.db.models.categories import Category
+    from dscommerce_fastapi.db.models.products import Product
+
 
 user_registry = registry()
 
