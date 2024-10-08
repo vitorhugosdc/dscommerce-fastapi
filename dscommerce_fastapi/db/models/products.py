@@ -1,8 +1,11 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
-from sqlalchemy import func
-from sqlalchemy.orm import Mapped, mapped_column, registry
+from sqlalchemy import ForeignKey, func
+from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
+
+from dscommerce_fastapi.db.models.categories import Category
+from dscommerce_fastapi.db.models.users import User
 
 product_registry = registry()
 
@@ -17,16 +20,37 @@ class Product:
     description: Mapped[Optional[str]]
     price: Mapped[float]
     img_url: Mapped[str]
-    # category
     created_at: Mapped[datetime] = mapped_column(
         init=False, default=func.now()
     )
-    # created_by_id: Mapped[int]
     updated_at: Mapped[Optional[datetime]] = mapped_column(
         init=False, onupdate=func.now()
     )
-    # updated_by_id
     is_active: Mapped[bool] = mapped_column(default=True)
+
+    # Foreign keys
+
+    created_by_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    updated_by_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey('categories.id'), nullable=False, index=True
+    )
+
+    # Relationships (relationships não são salvos no banco de dados,
+    # são apenas para definir a relação entre as tabelas)
+
+    created_by: Mapped['User'] = relationship(
+        'User', back_populates='products_created_by'
+    )
+    updated_by: Mapped['User'] = relationship(
+        'User', back_populates='products_updated_by'
+    )
+
+    # products é o nome do atributo lá na Category
+    category: Mapped[Category] = relationship(
+        'Category', back_populates='products'
+    )
 
     def __repr__(self):
         return f'<Product(id={self.id!r}, name={self.name!r}, \

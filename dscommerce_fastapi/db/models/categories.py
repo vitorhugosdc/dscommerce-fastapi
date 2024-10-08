@@ -1,8 +1,10 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from sqlalchemy import func
-from sqlalchemy.orm import Mapped, mapped_column, registry
+from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
+
+from dscommerce_fastapi.db.models.products import Product
 
 category_registry = registry()
 
@@ -19,4 +21,8 @@ class Category:
     updated_at: Mapped[Optional[datetime]] = mapped_column(
         init=False, onupdate=func.now()
     )
-    # list products
+
+    # Relationships
+    products: Mapped[List['Product']] = relationship(
+        'Product', back_populates='category'
+    )
