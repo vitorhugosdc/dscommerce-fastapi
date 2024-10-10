@@ -2,31 +2,25 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import ForeignKey, func
-from sqlalchemy.orm import Mapped, mapped_column, registry, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from dscommerce_fastapi.db.models.categories import Category
+from dscommerce_fastapi.db import Base
 from dscommerce_fastapi.db.models.users import User
 
-product_registry = registry()
 
-
-@product_registry.mapped_as_dataclass
-class Product:
+class Product(Base):
     __tablename__ = 'products'
 
-    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str]
     serial_code: Mapped[str]
     description: Mapped[Optional[str]]
     price: Mapped[float]
     img_url: Mapped[str]
-    created_at: Mapped[datetime] = mapped_column(
-        init=False, default=func.now()
-    )
-    updated_at: Mapped[Optional[datetime]] = mapped_column(
-        init=False, onupdate=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(default=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(onupdate=func.now())
     is_active: Mapped[bool] = mapped_column(default=True)
 
     # Foreign keys
@@ -42,10 +36,16 @@ class Product:
     # são apenas para definir a relação entre as tabelas)
 
     created_by: Mapped['User'] = relationship(
-        'User', back_populates='products_created_by'
+        'User',
+        back_populates='products_created_by',
+        # precisa desse argumento, pois como created_by e updated_by se referem
+        # a mesma chave primária na tabela users, tem que definir qual é qual
+        foreign_keys=[created_by_id],
     )
     updated_by: Mapped['User'] = relationship(
-        'User', back_populates='products_updated_by'
+        'User',
+        back_populates='products_updated_by',
+        foreign_keys=[updated_by_id],
     )
 
     # products é o nome do atributo lá na Category

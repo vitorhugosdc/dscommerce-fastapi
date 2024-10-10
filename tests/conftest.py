@@ -8,9 +8,8 @@ from sqlalchemy.pool import StaticPool
 
 from dscommerce_fastapi.app import app
 from dscommerce_fastapi.database import get_session
-from dscommerce_fastapi.db.models.categories import category_registry
-from dscommerce_fastapi.db.models.products import Product, product_registry
-from dscommerce_fastapi.db.models.users import User, user_registry
+from dscommerce_fastapi.db.models.products import Product
+from dscommerce_fastapi.db.models.users import User
 from dscommerce_fastapi.security import get_password_hash
 
 
@@ -70,9 +69,9 @@ def session():
 
     # cria todas as tabelas dos models que estão registrados como
     # @table_registry.mapped_as_dataclass, como o model User por exemplo
-    user_registry.metadata.create_all(engine)
-    product_registry.metadata.create_all(engine)
-    category_registry.metadata.create_all(engine)
+    # user_registry.metadata.create_all(engine)
+    # product_registry.metadata.create_all(engine)
+    # category_registry.metadata.create_all(engine)
 
     with Session(engine) as session:
         # yield transforma a Session em um gerador, a fixture vai rodar até o
