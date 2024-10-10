@@ -7,7 +7,6 @@ from alembic import context
 #vai dar b.o depois, ver um jeito de pegar todos, talvez dar um append, sei lá,
 # ou importar o table_registry de users em todo lugar
 from dscommerce_fastapi.db import Base
-from dscommerce_fastapi.db.models.users import user_registry
 
 from dscommerce_fastapi.settings import Settings
 
