@@ -54,7 +54,7 @@ def upgrade() -> None:
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('created_by_id', sa.Integer(), nullable=False),
-    sa.Column('updated_by_id', sa.Integer(), nullable=False),
+    sa.Column('updated_by_id', sa.Integer(), nullable=True),
     sa.Column('category_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], name=op.f('fk_products_category_id_categories')),
     sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], name=op.f('fk_products_created_by_id_users')),

@@ -26,7 +26,9 @@ class Product(Base):
     # Foreign keys
 
     created_by_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    updated_by_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    updated_by_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey('users.id')
+    )
 
     category_id: Mapped[int] = mapped_column(
         ForeignKey('categories.id'), nullable=False, index=True
@@ -42,7 +44,7 @@ class Product(Base):
         # a mesma chave primária na tabela users, tem que definir qual é qual
         foreign_keys=[created_by_id],
     )
-    updated_by: Mapped['User'] = relationship(
+    updated_by: Mapped[Optional['User']] = relationship(
         'User',
         back_populates='products_updated_by',
         foreign_keys=[updated_by_id],
