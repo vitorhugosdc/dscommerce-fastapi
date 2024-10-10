@@ -29,8 +29,8 @@ class CategoryRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class ListCategoryRead(CategoryRead):
-    categories: List[CategoryRead]
+class ListCategoryRead(BaseModel):
+    categories: list[CategoryRead]
 
 
 @router.post('', status_code=HTTPStatus.CREATED, response_model=CategoryRead)
@@ -46,7 +46,9 @@ def create_category(
 
 
 @router.get('', status_code=HTTPStatus.OK, response_model=ListCategoryRead)
-def read_categories(name: str | None = None, limit=10, offset=0, db=T_Session):
+def read_categories(
+    db: T_Session, name: str | None = None, limit=10, offset=0
+):
     query = select(Category).limit(limit).offset(offset)
 
     if name:
@@ -56,7 +58,6 @@ def read_categories(name: str | None = None, limit=10, offset=0, db=T_Session):
         # poderia ser f'{name}%' ou f'%{name}' também
         # query = query.filter(Category.name.like(f'%{name}%'))
         # query = query.where(Category.name.like(f'%{name}%'))
-
     db_categories = db.scalars(query).all()
 
     return {'categories': db_categories}
@@ -93,7 +94,8 @@ def update_category(
 
     # mas como tem um atributo só, pode ser assim:
 
-    db_category.name = data.name
+    if data.name:
+        db_category.name = data.name
 
     db.add(db_category)
     db.commit()
