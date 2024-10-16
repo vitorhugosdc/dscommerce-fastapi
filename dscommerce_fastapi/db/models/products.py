@@ -30,6 +30,7 @@ class Product(Base):
         ForeignKey('users.id')
     )
 
+    # não precisa do nullable se colocar Optional igual no arbo
     category_id: Mapped[int] = mapped_column(
         ForeignKey('categories.id'), nullable=False, index=True
     )
@@ -38,7 +39,13 @@ class Product(Base):
     # são apenas para definir a relação entre as tabelas)
 
     created_by: Mapped['User'] = relationship(
+        # pode tirar o 'User', pois ele já pega de 'User' acima
         'User',
+        # back_populates é pra uma relação bidirecional, ou seja,
+        # pro sqlalchemy saber que, se atualizar User,
+        # atualiza Product o Products relacionados a ele já na hora...
+        # a gente coloca na string o nome do ATRIBUTO lá na outra classe,
+        # ou seja, products_created_by lá em User
         back_populates='products_created_by',
         # precisa desse argumento, pois como created_by e updated_by se referem
         # a mesma chave primária na tabela users, tem que definir qual é qual

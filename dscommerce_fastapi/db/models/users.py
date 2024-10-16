@@ -26,6 +26,16 @@ class User(Base):
 
     # Relationships
 
+    # Acho que talvez não precisa ter esse relacionamento?
+    # Pois Não quero de user acessar seus produtos criados,
+    # como no arbo que tem referencia ao User mas não o inverso?
+
+    # Na verdade, coloca somente se quiser uma relação bidirectional, se não,
+    # deixa só lá em products mesmo,
+    # oq nesse caso faz sentido deixar somente lá mesmo
+    # no caso, user é Pai de Product, então ele não deve armazenar id,
+    # mas nesse caso mais específico ele só deve ter a relação, no máximo
+
     products_created_by: Mapped[List['Product']] = relationship(
         'Product',
         back_populates='created_by',
