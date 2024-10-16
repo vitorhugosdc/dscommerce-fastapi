@@ -36,16 +36,16 @@ class User(Base):
     # no caso, user é Pai de Product, então ele não deve armazenar id,
     # mas nesse caso mais específico ele só deve ter a relação, no máximo
 
-    products_created_by: Mapped[List['Product']] = relationship(
-        'Product',
-        back_populates='created_by',
-        foreign_keys='Product.created_by_id',
-    )
-    products_updated_by: Mapped[List['Product']] = relationship(
-        'Product',
-        back_populates='updated_by',
-        foreign_keys='Product.updated_by_id',
-    )
+    # products_created_by: Mapped[List['Product']] = relationship(
+    #     'Product',
+    #     back_populates='created_by',
+    #     foreign_keys='Product.created_by_id',
+    # )
+    # products_updated_by: Mapped[List['Product']] = relationship(
+    #     'Product',
+    #     back_populates='updated_by',
+    #     foreign_keys='Product.updated_by_id',
+    # )
 
     def __repr__(self):
         return f'<User(id={self.id!r}, name={self.name!r}, \
