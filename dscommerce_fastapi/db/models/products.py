@@ -1,13 +1,21 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import ForeignKey, func
+from sqlalchemy import Column, ForeignKey, Table, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from dscommerce_fastapi.db.models.categories import Category
 from dscommerce_fastapi.db import Base
 from dscommerce_fastapi.db.models.users import User
+
+# Tabela de associação Many-To-Many entre Product e Category
+ProductCategoryAssociation = Table(
+    'product_category',
+    Base.metadata,
+    Column('product_id', ForeignKey('products.id'), primary_key=True),
+    Column('category_id', ForeignKey('categories.id'), primary_key=True),
+)
 
 
 class Product(Base):
@@ -36,10 +44,10 @@ class Product(Base):
         ForeignKey('users.id'), index=True
     )
 
-    # não precisa do nullable se colocar Optional igual no arbo, deixei pra exemplo
-    category_id: Mapped[int] = mapped_column(
-        ForeignKey('categories.id'), nullable=False, index=True
-    )
+    # # não precisa do nullable se colocar Optional igual no arbo, deixei pra exemplo
+    # category_id: Mapped[int] = mapped_column(
+    #     ForeignKey('categories.id'), nullable=False, index=True
+    # )
 
     # Relationships (relationships não são salvos no banco de dados,
     # são apenas para definir a relação entre as tabelas)
@@ -68,7 +76,9 @@ class Product(Base):
     )
 
     # products é o nome do atributo lá na Category
-    category: Mapped['Category'] = relationship(back_populates='products')
+    categories: Mapped[List['Category']] = relationship(
+        secondary=ProductCategoryAssociation, back_populates='products'
+    )
 
     def __repr__(self):
         return f'<Product(id={self.id!r}, name={self.name!r}, \

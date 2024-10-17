@@ -5,7 +5,10 @@ from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from dscommerce_fastapi.db import Base
-from dscommerce_fastapi.db.models.products import Product
+from dscommerce_fastapi.db.models.products import (
+    Product,
+    ProductCategoryAssociation,
+)
 from dscommerce_fastapi.db.models.users import User
 
 
@@ -31,7 +34,11 @@ class Category(Base):
 
     # Relationships
 
-    products: Mapped[List['Product']] = relationship(back_populates='category')
+    # categories é o nome do atributo lá em Product
+    # talvez seria optional?
+    products: Mapped[List['Product']] = relationship(
+        secondary=ProductCategoryAssociation, back_populates='categories'
+    )
 
     created_by: Mapped['User'] = relationship(foreign_keys=[created_by_id])
     updated_by: Mapped[Optional['User']] = relationship(

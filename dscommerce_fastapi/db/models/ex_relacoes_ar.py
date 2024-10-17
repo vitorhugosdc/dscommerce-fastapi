@@ -12,3 +12,35 @@
 #     )
 
 # Classe que é o 1:
+
+
+# ----------------------------------------N pra N--------------------------------
+
+# Tabela intermediária:
+# class ProductCategory(Base):
+#     __tablename__ = 'product_category'
+
+#     id: Mapped[int] = mapped_column(primary_key=True)
+
+#     # Foreign Keys
+
+#     product_id: Mapped[int] = mapped_column(ForeignKey('products.id'))
+#     category_id: Mapped[int] = mapped_column(ForeignKey('categories.id'))
+
+# #    # products é o nome do atributo lá na Category
+#     categories: Mapped[List['Category']] = relationship(
+#         secondary='product_category', back_populates='products'
+#     )
+
+# class Product:
+
+#     # products é o nome do atributo lá na Category
+#     categories: Mapped[List['Category']] = relationship(
+#         secondary='product_category', back_populates='products'
+#     )
+
+# class Category:
+
+#     products: Mapped[List['Product']] = relationship(
+#         secondary='product_category', back_populates='categories'
+#     )
