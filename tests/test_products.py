@@ -1,9 +1,13 @@
 from http import HTTPStatus
 
+from dscommerce_fastapi.routers import categories
 from tests.conftest import ProductFactory
+from tests.factories import CategoryFactory
 
 
 def test_create_product(client, token):
+    category = CategoryFactory()
+
     response = client.post(
         '/products',
         headers={'Authorization': f'Bearer {token}'},
@@ -13,24 +17,54 @@ def test_create_product(client, token):
             'description': 'description',
             'price': 100,
             'img_url': 'url',
+            'categories_ids': [
+                category.id,
+            ],
         },
     )
 
     assert response.status_code == HTTPStatus.CREATED
     assert response.json() == {
-        'id': 1,
+        # precisou fazer assim pois a CategoryFactory cria um produto, ai ele pega o id 1
+        # mas verificar a logica, pois na teoria teria que ser indice 1, pois o product 1 ja tá em category
+        'id': category.products[0].id,
         'name': 'name',
         'serial_code': 'code',
         'description': 'description',
-        'price': 100,
+        'price': 100.0,
         'img_url': 'url',
+        'categories': [
+            {
+                'id': category.id,
+                'name': category.name,
+            }
+        ],
     }
+
+
+def test_create_product_category_not_exists(client, token):
+    response = client.post(
+        '/products',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'name': 'name',
+            'serial_code': 'code',
+            'description': 'description',
+            'price': 100,
+            'img_url': 'url',
+            'categories_ids': [
+                1,
+            ],
+        },
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'detail': 'Category not found'}
 
 
 def test_read_products(session, client, token):
     expected_products = 5
-    session.bulk_save_objects(ProductFactory.create_batch(expected_products))
-    session.commit()
+    products = ProductFactory.create_batch(expected_products)
 
     response = client.get(
         '/products', headers={'Authorization': f'Bearer {token}'}
