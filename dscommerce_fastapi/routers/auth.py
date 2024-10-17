@@ -30,7 +30,8 @@ def login_for_access_token(
     user = session.scalar(
         select(User).where(User.username == form_data.username)
     )
-    if not user or not verify_password(form_data.password, user.password):
+    # if not user or not verify_password(form_data.password, user.password):
+    if not user or not user.password == form_data.password:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
             detail='Incorrect username or password',

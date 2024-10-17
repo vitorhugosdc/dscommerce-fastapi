@@ -153,24 +153,22 @@ def test_read_users(client, user, token):
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'users': [
-            {
-                'id': user.id,
-                'name': user.name,
-                'username': user.username,
-                'email': user.email,
-                'phone': user.phone,
-            },
-            {
-                'id': user2.get('id'),
-                'name': user2.get('name'),
-                'username': user2.get('username'),
-                'email': user2.get('email'),
-                'phone': user2.get('phone'),
-            },
-        ]
-    }
+    assert response.json() == [
+        {
+            'id': user.id,
+            'name': user.name,
+            'username': user.username,
+            'email': user.email,
+            'phone': user.phone,
+        },
+        {
+            'id': user2.get('id'),
+            'name': user2.get('name'),
+            'username': user2.get('username'),
+            'email': user2.get('email'),
+            'phone': user2.get('phone'),
+        },
+    ]
 
 
 def test_read_users_using_other_user(client, user, token, other_user):
@@ -200,24 +198,22 @@ def test_read_users_using_other_user(client, user, token, other_user):
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {
-        'users': [
-            {
-                'id': user.id,
-                'name': user.name,
-                'username': user.username,
-                'email': user.email,
-                'phone': user.phone,
-            },
-            {
-                'id': other_user.id,
-                'name': other_user.name,
-                'username': other_user.username,
-                'email': other_user.email,
-                'phone': other_user.phone,
-            },
-        ]
-    }
+    assert response.json() == [
+        {
+            'id': user.id,
+            'name': user.name,
+            'username': user.username,
+            'email': user.email,
+            'phone': user.phone,
+        },
+        {
+            'id': other_user.id,
+            'name': other_user.name,
+            'username': other_user.username,
+            'email': other_user.email,
+            'phone': other_user.phone,
+        },
+    ]
 
 
 # aqui é só pra testar como funciona testar com um usuário
@@ -237,7 +233,7 @@ def test_read_users_with_user(client, user, token):
     )
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json() == {'users': [user_schema]}
+    assert response.json() == [user_schema]
 
 
 def test_update_users(client, user, token):

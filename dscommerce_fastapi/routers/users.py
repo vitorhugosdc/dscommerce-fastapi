@@ -10,7 +10,6 @@ from dscommerce_fastapi.database import get_session
 from dscommerce_fastapi.db.models.users import User
 from dscommerce_fastapi.schemas import (
     Message,
-    UserList,
     UserPublic,
     UserSchema,
 )
@@ -59,7 +58,7 @@ def create_user(data: UserSchema, db: T_Session):
     return db_user
 
 
-@router.get('', status_code=HTTPStatus.OK, response_model=UserList)
+@router.get('', status_code=HTTPStatus.OK, response_model=list[UserPublic])
 def read_users(
     db: T_Session,
     current_user: T_CurrentUser,
@@ -68,7 +67,7 @@ def read_users(
 ):
     query = select(User).limit(limit).offset(offset)
     users = db.scalars(query).all()
-    return {'users': users}
+    return users
 
 
 @router.put('/{user_id}', status_code=HTTPStatus.OK, response_model=UserPublic)

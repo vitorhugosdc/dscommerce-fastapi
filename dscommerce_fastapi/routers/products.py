@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Annotated
+from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict
@@ -26,7 +26,10 @@ class ProductCreate(BaseModel):
     description: str | None = None
     price: float
     img_url: str
-    category_id: int
+
+    # daria pra fazer outro endpoint que recebe a categoria
+    # como se fosse objeto mesmo, ou seja, id e nome, igual Category Read
+    categories_ids: List[int]
 
 
 class CategoryRead(BaseModel):
@@ -45,13 +48,9 @@ class ProductRead(BaseModel):
     description: str | None = None
     price: float
     img_url: str
-    category: CategoryRead
+    categories: List[CategoryRead]
 
     model_config = ConfigDict(from_attributes=True)
-
-
-class ListProductRead(BaseModel):
-    products: list[ProductRead]
 
 
 @router.post('', status_code=HTTPStatus.CREATED, response_model=ProductRead)
@@ -67,17 +66,18 @@ def create_product(
             status_code=HTTPStatus.BAD_REQUEST, detail='Product already exists'
         )
 
-    category = db.scalar(
-        select(Category).where(Category.id == data.category_id)
+    db_product = Product(
+        **data.model_dump(exclude_unset=True, exclude={'categories_ids'})
     )
-    if not category:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND, detail='Category not found'
-        )
-
-    db_product = Product(**data.model_dump(exclude_unset=True))
-
     db_product.created_by = current_user
+
+    for category_id in data.categories_ids:
+        c = db.scalar(select(Category).where(Category.id == category_id))
+        if not c:
+            raise HTTPException(
+                status_code=HTTPStatus.NOT_FOUND, detail='Category not found'
+            )
+        db_product.categories.append(c)
 
     db.add(db_product)
     db.commit()
@@ -86,9 +86,11 @@ def create_product(
     return db_product
 
 
-@router.get('', status_code=HTTPStatus.OK, response_model=ListProductRead)
+@router.get('', status_code=HTTPStatus.OK, response_model=list[ProductRead])
 def read_products(  # noqa
     db: T_Session,
+    # ao invés de vários parametros poderia fazer igual arbo
+    # onde recebe uma classe com os parametros opcionais
     name: str | None = None,
     serial_code: str | None = None,
     price: float | None = None,
@@ -99,11 +101,8 @@ def read_products(  # noqa
     # só de category estar no formato certo no ProductRead,
     # basta o join que ele retorne tudo certinho
     query = (
-        select(Product)
-        .join(Category)
-        .limit(limit)
-        .offset(offset)
-        .where(Product.is_active, Product.category_id == Category.id)
+        # joinedload
+        select(Product).limit(limit).offset(offset).where(Product.is_active)
     )
 
     if name:
@@ -122,7 +121,7 @@ def read_products(  # noqa
 
     db_products = db.scalars(query).all()
 
-    return {'products': db_products}
+    return db_products
 
 
 class ProductUpdate(BaseModel):

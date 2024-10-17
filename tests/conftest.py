@@ -120,10 +120,11 @@ def other_user(session):
     return user
 
 
+# Tive que adicionar user como parametro pois se não ele criava outro usuário
 @pytest.fixture
-def token(client):
+def token(client, user):
     # user = UserFactory(password=get_password_hash('testtest'))
-    user = UserFactory(password='testtest')
+    # user = UserFactory(password='testtest')
     response = client.post(
         '/auth/token',
         # data={'username': user.username, 'password': user.clean_password},
