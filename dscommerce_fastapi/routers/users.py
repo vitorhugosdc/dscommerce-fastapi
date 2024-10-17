@@ -41,7 +41,7 @@ def create_user(data: UserSchema, db: T_Session):
                 detail='Email already exists',
             )
 
-    hashed_password = get_password_hash(data.password)
+    # hashed_password = get_password_hash(data.password)
 
     # db_user = User(
     #     name=data.name,
@@ -53,8 +53,8 @@ def create_user(data: UserSchema, db: T_Session):
     # )
 
     db_user = User(
-        password=hashed_password,
-        **data.model_dump(exclude={'password'}, exclude_unset=True),
+        # password=hashed_password,
+        **data.model_dump(exclude_unset=True),
     )
 
     db.add(db_user)

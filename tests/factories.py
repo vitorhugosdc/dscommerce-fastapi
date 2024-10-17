@@ -49,7 +49,7 @@ class ProductFactory(factory.alchemy.SQLAlchemyModelFactory):
     name = factory.Faker('name')
     serial_code = factory.Sequence(lambda n: f'code{n}')
     description = factory.Faker('sentence')
-    price = factory.fuzzy.FuzzyDecimal(0, 1000, precision=2)
+    price = factory.fuzzy.FuzzyFloat(0, 1000, precision=2)
     img_url = factory.Faker('url')
     created_at = factory.Faker('date_time')
 

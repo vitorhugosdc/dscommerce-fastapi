@@ -72,3 +72,29 @@ def test_read_products(session, client, token):
 
     assert response.status_code == HTTPStatus.OK
     assert len(response.json()) == expected_products
+
+
+def test_get_product(client, token):
+    category = CategoryFactory()
+    product = ProductFactory()
+    product.categories.append(category)
+
+    response = client.get(
+        f'/products/{product.id}', headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'id': product.id,
+        'name': product.name,
+        'serial_code': product.serial_code,
+        'description': product.description,
+        'price': product.price,
+        'img_url': product.img_url,
+        'categories': [
+            {
+                'id': product.categories[0].id,
+                'name': product.categories[0].name,
+            }
+        ],
+    }
