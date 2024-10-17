@@ -1,7 +1,9 @@
 from http import HTTPStatus
+from operator import is_
 
 from dscommerce_fastapi.schemas import UserPublic
 from dscommerce_fastapi.security import get_password_hash
+from tests.factories import UserFactory
 
 
 def test_create_user(client):
@@ -167,6 +169,25 @@ def test_read_users(client, user, token):
             'username': user2.get('username'),
             'email': user2.get('email'),
             'phone': user2.get('phone'),
+        },
+    ]
+
+
+def test_read_users_with_inactive_user(client, user, token):
+    user2 = UserFactory(is_active=False)
+
+    response = client.get(
+        '/users', headers={'Authorization': f'Bearer {token}'}
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == [
+        {
+            'id': user.id,
+            'name': user.name,
+            'username': user.username,
+            'email': user.email,
+            'phone': user.phone,
         },
     ]
 

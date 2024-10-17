@@ -43,12 +43,18 @@ def create_user(data: UserSchema, db: T_Session):
 
     hashed_password = get_password_hash(data.password)
 
+    # db_user = User(
+    #     name=data.name,
+    #     username=data.username,
+    #     email=data.email,
+    #     phone=data.phone,
+    #     password=hashed_password,
+    #     is_active=data.is_active,
+    # )
+
     db_user = User(
-        name=data.name,
-        username=data.username,
-        email=data.email,
-        phone=data.phone,
         password=hashed_password,
+        **data.model_dump(exclude={'password'}, exclude_unset=True),
     )
 
     db.add(db_user)
@@ -65,7 +71,9 @@ def read_users(
     limit: int = 10,
     offset: int = 0,
 ):
-    query = select(User).limit(limit).offset(offset)
+    query = (
+        select(User).limit(limit).offset(offset).where(User.is_active == True)
+    )
     users = db.scalars(query).all()
     return users
 

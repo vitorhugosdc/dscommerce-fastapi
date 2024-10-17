@@ -103,6 +103,24 @@ def update_category(
     return db_category
 
 
+@router.get(
+    '/{category_id}', status_code=HTTPStatus.OK, response_model=CategoryRead
+)
+def get_category(category_id: int, db: T_Session, current_user: T_CurrentUser):
+    query = select(Category).where(
+        Category.id == category_id, Category.is_active
+    )
+
+    db_category = db.scalar(query)
+
+    if not db_category:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND, detail='Category not found'
+        )
+
+    return db_category
+
+
 @router.delete(
     '/{category_id}', status_code=HTTPStatus.OK, response_model=Message
 )
