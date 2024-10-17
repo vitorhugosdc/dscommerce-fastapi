@@ -23,6 +23,8 @@ T_CurrentUser = Annotated[User, Depends(get_current_user)]
 class ProductCreate(BaseModel):
     name: str
     serial_code: str
+    # str | None significaria que pode ser str ou None, mas tem que receber um deles
+    # str | None = None significa que tem que ser str ou, se se não receber nada, ele automaticamente fica None
     description: str | None = None
     price: float
     img_url: str
@@ -67,6 +69,11 @@ def create_product(
         )
 
     db_product = Product(
+        # por que do exclude_unset? pois se tiver algum atributo
+        # que seja | None ou | None = None, ele ignora,
+        # e geralmente se no recebimento pode ser 1 desses 2, é porque no banco é um campo opcional (Optional), então o proprio banco atribui Nulo/None a esse campo
+        # Agora, caso precisemos tratar um atributo especifico, como no caso abaixo, precisamos garantir que as categorias existem antes de inserir no banco,
+        # excluimos dela do model dump, ou seja, não vai ser setada em Products ainda, e, logo mais abaixo usamos o append pra adicionar as categorias ao Products
         **data.model_dump(exclude_unset=True, exclude={'categories_ids'})
     )
     db_product.created_by = current_user
@@ -87,7 +94,7 @@ def create_product(
 
 
 @router.get('', status_code=HTTPStatus.OK, response_model=list[ProductRead])
-def read_products(  # noqa
+def read_products(  # noqa#
     db: T_Session,
     # ao invés de vários parametros poderia fazer igual arbo
     # onde recebe uma classe com os parametros opcionais
