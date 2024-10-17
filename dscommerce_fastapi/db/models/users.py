@@ -21,7 +21,10 @@ class User(Base):
     phone: Mapped[Optional[str]] = mapped_column(unique=True)
     password: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(default=func.now())
+    # Optional significa que é opcional no banco de dados e,
+    # se não for informado será Nulo | None
     updated_at: Mapped[Optional[datetime]] = mapped_column(onupdate=func.now())
+    deleted_at: Mapped[Optional[datetime]] = mapped_column()
     is_active: Mapped[bool] = mapped_column(default=True)
 
     # Relationships
