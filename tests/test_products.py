@@ -1,5 +1,8 @@
 from http import HTTPStatus
 
+from sqlalchemy import select
+
+from dscommerce_fastapi.db.models.products import Product
 from tests.conftest import ProductFactory
 from tests.factories import CategoryFactory
 
@@ -146,12 +149,29 @@ def test_update_product_category_not_exists(client, user, token):
             'description': 'new description',
             'price': 200,
             'img_url': 'new url',
+            # se passar categoria que não existe ele não da erro, pela maneira que foi feito
+            # ele meio que só ignora mesmo
             'categories_ids': [2],
         },
     )
 
-    assert response.json() == {'detail': 'Category not found'}
-    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'id': product.id,
+        'name': 'new name',
+        'serial_code': 'new code',
+        'description': 'new description',
+        'price': 200.0,
+        'img_url': 'new url',
+        'categories': [
+            {
+                # como categoria 2 não existe, o esperado é que tenha só a que já tinha
+                'id': product.categories[0].id,
+                'name': product.categories[0].name,
+            }
+            # for category in product.categories
+        ],
+    }
 
 
 def test_get_product(client, token):
@@ -180,7 +200,7 @@ def test_get_product(client, token):
     }
 
 
-def test_delete_product(client, user, token):
+def test_delete_product(session, client, user, token):
     product = ProductFactory(created_by=user)
     response = client.delete(
         f'/products/{product.id}', headers={'Authorization': f'Bearer {token}'}
@@ -188,6 +208,31 @@ def test_delete_product(client, user, token):
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == {'message': 'Product deleted successfully'}
+    assert (
+        session.scalars(
+            select(Product).where(Product.id == product.id, Product.is_active)
+        ).one_or_none()
+        is None
+    )
+    # apenas maneiras diferentes de fazer a mesma coisa que acima
+    assert (
+        session.scalar(
+            select(Product).where(Product.id == product.id, Product.is_active)
+        )
+        is None
+    )
+    assert (
+        session.query(Product)
+        .filter(Product.id == product.id, Product.is_active)
+        .first()
+        is None
+    )
+    assert (
+        session.scalar(
+            select(Product).filter(Product.id == product.id, Product.is_active)
+        )
+        is None
+    )
 
 
 def test_delete_product_user_didnt_create_product(client, token):
