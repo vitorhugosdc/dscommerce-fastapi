@@ -31,11 +31,11 @@ class CategoryFactory(factory.alchemy.SQLAlchemyModelFactory):
     name = factory.Faker('name')
     created_at = factory.Faker('date_time')
 
-    products = factory.RelatedFactoryList(
-        'tests.factories.ProductFactory',
-        'categories',
-        size=2,
-    )
+    # products = factory.RelatedFactoryList(
+    #     'tests.factories.ProductFactory',
+    #     'categories',
+    #     size=2,
+    # )
 
     created_by = factory.SubFactory(UserFactory)
 
@@ -53,8 +53,8 @@ class ProductFactory(factory.alchemy.SQLAlchemyModelFactory):
     img_url = factory.Faker('url')
     created_at = factory.Faker('date_time')
 
-    categories = factory.RelatedFactoryList(
-        CategoryFactory, 'products', size=2
-    )
+    categories = factory.List([
+        factory.SubFactory(CategoryFactory),
+    ])
 
     created_by = factory.SubFactory(UserFactory)

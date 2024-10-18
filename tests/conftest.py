@@ -66,7 +66,7 @@ def session():
     #     drop_database(engine.url)
     # create_database(engine.url)
 
-    Base.metadata.create_all(engine)
+    Base.metadata.create_all(bind=engine)
 
     TestingSessionLocal = sessionmaker(
         bind=engine, autocommit=False, autoflush=False

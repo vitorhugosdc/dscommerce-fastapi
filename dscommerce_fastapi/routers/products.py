@@ -173,6 +173,7 @@ def update_product(
             status_code=HTTPStatus.NOT_FOUND, detail='Product not found'
         )
 
+    # ------------tem que pensar dps no caso em que ele REMOVE uma categoria
     if data.categories_ids:
         # se não tivesse o selectinload lá em cima aqui estaria pesquisando
         # cada categoria em uma query separada
@@ -185,6 +186,8 @@ def update_product(
             if id not in categories_ids_already_in_product
         ]
 
+        # ---uma solução pro problema de caso alguma categoria não existem mais
+        # é verificar ela no db com a flag is_active
         if categories_ids_not_already_in_product:
             query = select(Category).where(
                 Category.id.in_(categories_ids_not_already_in_product)
