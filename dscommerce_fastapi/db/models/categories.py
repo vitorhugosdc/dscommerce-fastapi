@@ -36,7 +36,7 @@ class Category(Base):
 
     # categories é o nome do atributo lá em Product
     # talvez seria optional?
-    products: Mapped[List['Product']] = relationship(
+    products: Mapped[Optional[List['Product']]] = relationship(
         secondary=ProductCategoryAssociation, back_populates='categories'
     )
 

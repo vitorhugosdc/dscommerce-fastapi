@@ -4,7 +4,7 @@ from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from dscommerce_fastapi.database import get_session
 from dscommerce_fastapi.db.models.categories import Category
@@ -79,7 +79,11 @@ def create_product(
     db_product.created_by = current_user
 
     for category_id in data.categories_ids:
-        c = db.scalar(select(Category).where(Category.id == category_id))
+        c = db.scalar(
+            select(Category).where(
+                Category.id == category_id, Category.is_active
+            )
+        )
         if not c:
             raise HTTPException(
                 status_code=HTTPStatus.NOT_FOUND, detail='Category not found'
@@ -108,9 +112,8 @@ def read_products(  # noqa#
     # só de category estar no formato certo no ProductRead,
     # basta o join que ele retorne tudo certinho
     query = (
-        # joinedload
         select(Product)
-        .options(joinedload(Product.categories))
+        .options(selectinload(Product.categories))
         .limit(limit)
         .offset(offset)
         .where(Product.is_active)
@@ -208,7 +211,6 @@ def delete_product(
 
     db_product.is_active = False
     db.commit()
-    db.refresh(db_product)
 
     return {'message': 'Product deleted successfully'}
 

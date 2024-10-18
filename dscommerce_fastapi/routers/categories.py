@@ -1,4 +1,6 @@
+from datetime import UTC, datetime
 from http import HTTPStatus
+from time import timezone
 from typing import Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -37,8 +39,11 @@ class ListCategoryRead(BaseModel):
 def create_category(
     data: CategoryCreate, db: T_Session, current_user: T_CurrentUser
 ):
-    db_category = Category(**data.model_dump(exclude_unset=True))
+    db_category = Category(
+        created_by=current_user, **data.model_dump(exclude_unset=True)
+    )
 
+    # o nome é unique, mas no model já tem que a verificação é feita no DB
     db.add(db_category)
     db.commit()
     db.refresh(db_category)
@@ -49,7 +54,9 @@ def create_category(
 def read_categories(
     db: T_Session, name: str | None = None, limit=10, offset=0
 ):
-    query = select(Category).limit(limit).offset(offset)
+    query = (
+        select(Category).limit(limit).offset(offset).where(Category.is_active)
+    )
 
     if name:
         # contais é o %LIKE%
@@ -127,7 +134,9 @@ def get_category(category_id: int, db: T_Session, current_user: T_CurrentUser):
 def delete_category(
     category_id: int, db: T_Session, current_user: T_CurrentUser
 ):
-    query = select(Category).where(Category.id == category_id)
+    query = select(Category).where(
+        Category.id == category_id, Category.is_active
+    )
 
     db_category = db.scalar(query)
 
@@ -141,6 +150,11 @@ def delete_category(
     #         status_code=HTTPStatus.FORBIDDEN, detail='Not enough permissions'
     #     )
 
-    db.delete(db_category)
+    db_category.is_active = False
+    db_category.deleted_at = datetime.now(UTC)
+    # poderia ser só o id?
+    # db_category.deleted_by_id = current_user.id
+    db_category.deleted_by = current_user
+    # db.delete(db_category)
     db.commit()
     return {'message': 'Category deleted successfully'}
