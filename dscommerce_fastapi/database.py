@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from dscommerce_fastapi.settings import Settings
 
-engine = create_engine(Settings().DATABASE_URL)
+engine = create_engine(Settings().DATABASE_URL, echo=False)
 
 
 # o comentário ao lado da definição da função serve para ser ignorado

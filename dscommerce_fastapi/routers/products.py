@@ -144,7 +144,7 @@ class ProductUpdate(BaseModel):
     description: str | None = None
     price: float | None = None
     img_url: str | None = None
-    category_id: int | None = None
+    categories_ids: List[int] | None = None
 
 
 @router.patch(
@@ -156,10 +156,14 @@ def update_product(
     db: T_Session,
     current_user: T_CurrentUser,
 ):
-    query = select(Product).where(
-        Product.id == product_id,
-        Product.is_active,
-        Product.created_by_id == current_user.id,
+    query = (
+        select(Product)
+        .options(selectinload(Product.categories))
+        .where(
+            Product.id == product_id,
+            Product.is_active,
+            Product.created_by_id == current_user.id,
+        )
     )
 
     db_product = db.scalar(query)
@@ -169,16 +173,45 @@ def update_product(
             status_code=HTTPStatus.NOT_FOUND, detail='Product not found'
         )
 
-    if data.category_id:
-        category = db.scalar(
-            select(Category).where(Category.id == data.category_id)
-        )
-        if not category:
-            raise HTTPException(
-                status_code=HTTPStatus.NOT_FOUND, detail='Category not found'
+    if data.categories_ids:
+        # se não tivesse o selectinload lá em cima aqui estaria pesquisando
+        # cada categoria em uma query separada
+        categories_ids_already_in_product = [
+            c.id for c in db_product.categories
+        ]
+        categories_ids_not_already_in_product = [
+            id
+            for id in data.categories_ids
+            if id not in categories_ids_already_in_product
+        ]
+
+        if categories_ids_not_already_in_product:
+            query = select(Category).where(
+                Category.id.in_(categories_ids_not_already_in_product)
             )
 
-    for key, value in data.model_dump(exclude_unset=True).items():
+            categories = db.scalars(query).all()
+            if categories:
+                db_product.categories.extend(categories)
+
+        # Maneira antiga que pensei, mas geraria várias querys pesquisando cada categoria,
+        # então fiz da maneira acima que já busca tudo de uma vez
+        # categories_ids = [c.id for c in db_product.categories]
+        # for category_id in data.categories_ids:
+        #     # caso id já não esteja associado ao produto, ou seja, categoria nova atribuida
+        #     if category_id not in categories_ids:
+        #         category = db.scalar(
+        #             select(Category).where(Category.id == category_id)
+        #         )
+        #         if not category:
+        #             raise HTTPException(
+        #                 status_code=HTTPStatus.NOT_FOUND,
+        #                 detail=f'Category with id {category_id} not found',
+        #             )
+
+    for key, value in data.model_dump(
+        exclude_unset=True, exclude={'categories_ids'}
+    ).items():
         setattr(db_product, key, value)
 
     db_product.updated_by = current_user
