@@ -1,15 +1,15 @@
 from datetime import UTC, datetime
 from http import HTTPStatus
-from time import timezone
-from typing import Annotated, List
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from dscommerce_fastapi.database import get_session
 from dscommerce_fastapi.db.models.categories import Category
+from dscommerce_fastapi.db.models.products import Product
 from dscommerce_fastapi.db.models.users import User
 from dscommerce_fastapi.schemas import Message
 from dscommerce_fastapi.security import get_current_user
@@ -83,7 +83,9 @@ def update_category(
     db: T_Session,
     current_user: T_CurrentUser,
 ):
-    query = select(Category).where(Category.id == category_id)
+    query = select(Category).where(
+        Category.id == category_id, Category.is_active
+    )
     db_category = db.scalar(query)
     if not db_category:
         raise HTTPException(
@@ -128,6 +130,8 @@ def get_category(category_id: int, db: T_Session, current_user: T_CurrentUser):
     return db_category
 
 
+# Como o produto deve ter uma categoria, devemos fazer alguma coisa pra
+# categoria deletada não aparecer lá em products, ou seja, remover da tabela de associação
 @router.delete(
     '/{category_id}', status_code=HTTPStatus.OK, response_model=Message
 )
@@ -149,6 +153,18 @@ def delete_category(
     #     raise HTTPException(
     #         status_code=HTTPStatus.FORBIDDEN, detail='Not enough permissions'
     #     )
+
+    # query = (
+    #     select(Product)
+    #     .join(Product.categories)
+    #     .options(selectinload(Product.categories))
+    #     .where(Product.categories.any(id=db_category.id))
+    # )
+
+    # db_products = db.scalars(query).all()
+
+    # for product in db_products:
+    #     product.categories.remove(db_category)
 
     db_category.is_active = False
     db_category.deleted_at = datetime.now(UTC)
