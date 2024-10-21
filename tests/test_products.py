@@ -44,6 +44,29 @@ def test_create_product(client, token):
     }
 
 
+def test_create_product_already_exists(client, token):
+    product = ProductFactory()
+    category = CategoryFactory()
+
+    response = client.post(
+        '/products',
+        headers={'Authorization': f'Bearer {token}'},
+        json={
+            'name': 'name',
+            'serial_code': product.serial_code,
+            'description': 'description',
+            'price': 100,
+            'img_url': 'url',
+            'categories_ids': [
+                category.id,
+            ],
+        },
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'detail': 'Product already exists'}
+
+
 def test_create_product_category_not_exists(client, token):
     response = client.post(
         '/products',
