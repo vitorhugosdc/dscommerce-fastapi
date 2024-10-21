@@ -23,4 +23,7 @@ class Payment(Base):
 
     # Relationships
 
-    order: Mapped['Order'] = relationship(back_populates='payment')
+    # talvez não precisa do foreign_keys?
+    order: Mapped['Order'] = relationship(
+        back_populates='payment', foreign_keys=[order_id]
+    )

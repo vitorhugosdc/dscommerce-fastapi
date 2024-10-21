@@ -24,11 +24,11 @@ OrderProductAssociation = Table(
 
 class Order(Base):
     class OrderStatus(Enum):
-        WAITING_PAYMENT = 0
-        PAID = 1
-        SHIPPED = 2
-        DELIVERED = 3
-        CANCELED = 4
+        WAITING_PAYMENT = 'WAITING_PAYMENT'
+        PAID = 'PAID'
+        SHIPPED = 'SHIPPED'
+        DELIVERED = 'DELIVERED'
+        CANCELED = 'CANCELED'
 
     __tablename__ = 'orders'
 
@@ -42,9 +42,6 @@ class Order(Base):
     # Foreign Keys
 
     client_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
-    payment_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey('payments.id')
-    )
 
     # Relationships
 
@@ -53,5 +50,13 @@ class Order(Base):
         secondary=OrderProductAssociation, back_populates='orders'
     )
 
-    client: Mapped['User'] = relationship(back_populates='orders')
-    payment: Mapped[Optional['Payment']] = relationship(back_populates='order')
+    client: Mapped['User'] = relationship(
+        back_populates='orders', foreign_keys=[client_id]
+    )
+    # não tem payment_id aqui pois em One-To-One, a gente coloca
+    # chave estrangeira somente na tabela filha, apontando pra pai,
+    # como Order é pai de Payment, a gente coloca order_id em payment
+    # e aqui deixa só a relação
+    payment: Mapped[Optional['Payment']] = relationship(
+        back_populates='order',
+    )

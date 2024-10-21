@@ -1,17 +1,20 @@
-import factory.fuzzy
 import pytest
 import sqlalchemy
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
-from sqlalchemy_utils import create_database, database_exists, drop_database
 
 from dscommerce_fastapi.app import app
 from dscommerce_fastapi.database import get_session
 from dscommerce_fastapi.db import Base
-from dscommerce_fastapi.security import get_password_hash
-from tests.factories import CategoryFactory, ProductFactory, UserFactory
+from tests.factories import (
+    CategoryFactory,
+    OrderFactory,
+    PaymentFactory,
+    ProductFactory,
+    UserFactory,
+)
 
 # class UserFactory(factory.Factory):
 #     class Meta:
@@ -79,6 +82,8 @@ def session():
     UserFactory._meta.sqlalchemy_session = session
     ProductFactory._meta.sqlalchemy_session = session
     CategoryFactory._meta.sqlalchemy_session = session
+    OrderFactory._meta.sqlalchemy_session = session
+    PaymentFactory._meta.sqlalchemy_session = session
 
     nested = connection.begin_nested()
 

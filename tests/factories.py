@@ -2,6 +2,8 @@ import factory
 import factory.fuzzy
 
 from dscommerce_fastapi.db.models.categories import Category
+from dscommerce_fastapi.db.models.orders import Order
+from dscommerce_fastapi.db.models.payment import Payment
 from dscommerce_fastapi.db.models.products import Product
 from dscommerce_fastapi.db.models.users import User
 
@@ -58,3 +60,30 @@ class ProductFactory(factory.alchemy.SQLAlchemyModelFactory):
     ])
 
     created_by = factory.SubFactory(UserFactory)
+
+
+class OrderFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Order
+        sqlalchemy_session_persistence = 'flush'
+
+    id = factory.Sequence(lambda n: n)
+    status = Order.OrderStatus.WAITING_PAYMENT
+    created_at = factory.Faker('date_time')
+
+    client = factory.SubFactory(UserFactory)
+
+    products = factory.List([
+        factory.SubFactory(ProductFactory),
+    ])
+
+
+class PaymentFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Payment
+        sqlalchemy_session_persistence = 'flush'
+
+    id = factory.Sequence(lambda n: n)
+    moment = factory.Faker('date_time')
+
+    order = factory.SubFactory(OrderFactory)
