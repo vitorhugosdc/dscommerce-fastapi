@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING, List, Optional
 from sqlalchemy import Column, ForeignKey, Table, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from dscommerce_fastapi.db.models.orders import Order, OrderProductAssociation
+
 if TYPE_CHECKING:
     from dscommerce_fastapi.db.models.categories import Category
 from dscommerce_fastapi.db import Base
@@ -78,6 +80,10 @@ class Product(Base):
     # products é o nome do atributo lá na Category
     categories: Mapped[List['Category']] = relationship(
         secondary=ProductCategoryAssociation, back_populates='products'
+    )
+
+    orders: Mapped[Optional[List['Order']]] = relationship(
+        secondary=OrderProductAssociation, back_populates='products'
     )
 
     def __repr__(self):

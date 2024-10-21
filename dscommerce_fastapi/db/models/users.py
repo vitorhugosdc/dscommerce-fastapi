@@ -5,10 +5,12 @@ from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from dscommerce_fastapi.db import Base
+from dscommerce_fastapi.db.models.orders import Order
 
 if TYPE_CHECKING:
     # from dscommerce_fastapi.db.models.categories import Category
     from dscommerce_fastapi.db.models.products import Product
+from dscommerce_fastapi.db.models.orders import Order
 
 
 class User(Base):
@@ -28,6 +30,10 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(default=True)
 
     # Relationships
+
+    orders: Mapped[Optional[List['Order']]] = relationship(
+        back_populates='client'
+    )
 
     # Acho que talvez não precisa ter esse relacionamento?
     # Pois Não quero de user acessar seus produtos criados,
