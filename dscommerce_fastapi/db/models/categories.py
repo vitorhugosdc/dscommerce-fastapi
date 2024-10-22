@@ -34,11 +34,15 @@ class Category(Base):
 
     # Relationships
 
+    # -------- Many-To-Many entre Product e Category com tabela intermediária, sem atributos extras --------
+
     # categories é o nome do atributo lá em Product
     # talvez seria optional?
     products: Mapped[Optional[List['Product']]] = relationship(
         secondary=ProductCategoryAssociation, back_populates='categories'
     )
+
+    # -------- fim Many-To-Many entre User e Category com tabela intermediária, sem atributos extras --------
 
     created_by: Mapped['User'] = relationship(foreign_keys=[created_by_id])
     updated_by: Mapped[Optional['User']] = relationship(

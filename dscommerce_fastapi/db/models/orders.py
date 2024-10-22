@@ -6,6 +6,7 @@ from sqlalchemy import Column, ForeignKey, Table, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from dscommerce_fastapi.db import Base
+from dscommerce_fastapi.db.models.order_item import OrderItem
 from dscommerce_fastapi.db.models.payment import Payment
 
 if TYPE_CHECKING:
@@ -45,10 +46,19 @@ class Order(Base):
 
     # Relationships
 
+    # -------- Many-To-Many entre Order e product com tabela intermediária e atributos extras --------
+
     # orders é o nome do atributo lá em Product
     products: Mapped[List['Product']] = relationship(
-        secondary=OrderProductAssociation, back_populates='orders'
+        secondary='order_item', back_populates='orders'
     )
+
+    order_products_association: Mapped[List['OrderItem']] = relationship(
+        # order é o nome do atributo lá em OrderItem
+        back_populates='order',
+    )
+
+    # -------- fim Many-To-Many entre Order e product com tabela intermediária e atributos extras --------
 
     client: Mapped['User'] = relationship(
         back_populates='orders', foreign_keys=[client_id]

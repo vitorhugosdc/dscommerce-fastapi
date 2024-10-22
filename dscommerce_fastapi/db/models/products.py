@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING, List, Optional
 from sqlalchemy import Column, ForeignKey, Table, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from dscommerce_fastapi.db.models.orders import Order, OrderProductAssociation
+from dscommerce_fastapi.db.models.order_item import OrderItem
+from dscommerce_fastapi.db.models.orders import Order
 
 if TYPE_CHECKING:
     from dscommerce_fastapi.db.models.categories import Category
@@ -77,14 +78,26 @@ class Product(Base):
         foreign_keys=[deleted_by_id],
     )
 
+    # -------- Many-To-Many entre Product e Category com tabela intermediária, sem atributos extras --------
+
     # products é o nome do atributo lá na Category
     categories: Mapped[List['Category']] = relationship(
         secondary=ProductCategoryAssociation, back_populates='products'
     )
 
+    # -------- fim Many-To-Many entre Product e Category com tabela intermediária, sem atributos extras --------
+
+    # -------- Many-To-Many entre Order e product com tabela intermediária e atributos extras --------
     orders: Mapped[Optional[List['Order']]] = relationship(
-        secondary=OrderProductAssociation, back_populates='products'
+        secondary='order_item', back_populates='products'
     )
+
+    order_products_association: Mapped[List['OrderItem']] = relationship(
+        # product é o nome do atributo lá em OrderItem
+        back_populates='product',
+    )
+
+    # -------- fim Many-To-Many entre Order e product com tabela intermediária e atributos extras --------
 
     def __repr__(self):
         return f'<Product(id={self.id!r}, name={self.name!r}, \
