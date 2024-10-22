@@ -1,8 +1,7 @@
 from datetime import datetime
-from enum import Enum
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, Table, func
+from sqlalchemy import ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from dscommerce_fastapi.db import Base

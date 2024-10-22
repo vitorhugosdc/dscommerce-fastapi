@@ -8,6 +8,7 @@ from dscommerce_fastapi.routers import (
     auth,
     categories,
     orders,
+    payments,
     products,
     users,
 )
@@ -28,6 +29,7 @@ app.include_router(auth.router)
 app.include_router(products.router)
 app.include_router(categories.router)
 app.include_router(orders.router)
+app.include_router(payments.router)
 
 
 # response model é o Model de resposta, ou seja,

@@ -36,7 +36,7 @@ class ProductRead(BaseModel):
 
 class PaymentRead(BaseModel):
     id: int
-    status: str
+    moment: datetime
 
 
 class OrderRead(BaseModel):
@@ -57,6 +57,7 @@ def create_order(
     )
     products = session.scalars(query).all()
 
+    # se o número for diferente, significa que algum produto não existe ou nao está ativo
     if len(products) != len(data.products_ids):
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST, detail='Product not found'
